@@ -1,7 +1,127 @@
 # Project 1
 
 ## Enter Data Service
+### Dockerfile
+Install Node, Mysql12, Axios and Body-Parser from package.json
 
+```Dockerfile
+FROM node:18
+
+COPY package.json ./
+RUN npm install
+```
+
+```json
+{
+    "name": "enter-data-service",
+    "version": "1.0.0",
+    "description": "Service for users to enter data",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "mysql2": "^3.9.6",  
+      "body-parser": "^1.20.2",
+      "axios": "^1.3.5"
+    }
+  }
+  
+```
+
+Create the node app (server.js) and expose onto port 4000
+
+```Dockerfile
+CMD ["node", "server.js"]
+EXPOSE 4000
+```
+
+### server.js
+Create express app
+
+```JavaScript
+const express = require("express");
+const mysql = require("mysql2");
+const axios = require("axios");
+const path = require("path");
+
+const app = express();
+app.use(express.json());
+```
+
+Connects app to the mysql service
+
+```JavaScript
+function connectToDB() {
+    const db = mysql.createConnection({
+      host: "mysql",
+      user: "root",
+      password: "nathan",
+      database: "stats"
+    });
+  
+    // sometimes mysql is not online by the time this runs, so run it again after a bit (5 seconds)
+    db.connect((err) => {
+      if (err) {
+        console.log("Error connecting to MySQL, retrying...", err);
+        setTimeout(connectToDB, 5000);
+      } else {
+        console.log("Connected to MySQL!");
+      }
+    });
+  
+    return db;
+  }
+  connectToDB();
+```
+
+Creates a post request to authentication to login
+If the user credentials doesn't match, it won't
+
+```JavaScript
+app.post("/enter", async (req, res) => {
+    const { username, password, value } = req.body;
+
+    // check authentication
+    const authResponse = await axios.post("http://authentication-service:5000/login", { username, password });
+    if (!authResponse.data.success) return res.status(401).json({ message: "Unauthorized" });
+
+```
+
+If the user is logged in, it will get the value from the body
+
+```JavaScript
+const db = mysql.createConnection({
+      host: "mysql",
+      user: "root",
+      password: "nathan",
+      database: "stats"
+    });
+```
+
+Commit ```value``` to the mysql database
+
+```JavaScript
+    // mysql data insert
+    db.query("INSERT INTO speed_data (speed) VALUES (?)", [value], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ message: "Data entered successfully!" });
+    });
+});
+```
+
+Serves the html file (index.html) on the root route
+Starts the Express server on port 4000
+
+```JavaScript
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.listen(4000, () => console.log("Enter Data Service running on port 4000"));
+
+```
 
 ## Show Results Service
 
