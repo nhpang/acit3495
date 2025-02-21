@@ -37,7 +37,7 @@ CMD ["node", "server.js"]
 EXPOSE 4000
 ```
 
-### server.js
+### enter-data-service/server.js
 Create express app
 
 ```JavaScript
@@ -124,6 +124,85 @@ app.listen(4000, () => console.log("Enter Data Service running on port 4000"));
 ```
 
 ## Show Results Service
+### Dockerfile
+Install node.js and everything in package.json
+
+```Dockerfile
+FROM node:18
+
+COPY package.json ./
+RUN npm install
+```
+
+```json
+{
+    "name": "show-results-service",
+    "version": "1.0.0",
+    "description": "Service to fetch and show analytics results",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "mongodb": "^5.6.0",
+      "body-parser": "^1.20.2"
+    }
+  }
+  
+```
+It will create a node app (server.js) exposed to port 7000
+
+```Dockerfile
+CMD ["node", "server.js"]
+EXPOSE 7000
+```
+
+### show-results-service/server.js
+Create an express app and connect to mongodb
+
+```JavaScript
+const express = require("express");
+const { MongoClient } = require("mongodb");
+const path = require("path");
+
+const app = express();
+const mongoClient = new MongoClient("mongodb://mongo:27017");
+```
+
+Create a GET endpoint that grabs the most recent stats from mongodb
+```JavaScript
+app.get("/results", async (req, res) => {
+    await mongoClient.connect();
+    const db = mongoClient.db("analytics_db");
+    var stats = await db.collection("stats").find().toArray();
+    const display = stats[stats.length - 1];
+    res.json(display);
+});
+```
+
+Displays the stats on index.html
+```JavaScript
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+```
+
+Creates Express app on port 7000
+
+```JavaScript
+app.listen(7000, () => console.log("Show Results Service running on port 7000"));
+```
+
+```JavaScript
+app.get("/results", async (req, res) => {
+    await mongoClient.connect();
+    const db = mongoClient.db("analytics_db");
+    var stats = await db.collection("stats").find().toArray();
+    const display = stats[stats.length - 1];
+    res.json(display);
+});
+```
 
 ## Authentication Service
 ### Dockerfile
@@ -160,7 +239,7 @@ CMD ["node", "server.js"]
 EXPOSE 5000
 ```
 
-### server.js
+### authentication-service/server.js
 
 Creates an express.js app including CQRS for controlling domain access
 
