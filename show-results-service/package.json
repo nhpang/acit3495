@@ -1,0 +1,15 @@
+{
+    "name": "show-results-service",
+    "version": "1.0.0",
+    "description": "Service to fetch and show analytics results",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.18.2",
+      "mongodb": "^5.6.0",
+      "body-parser": "^1.20.2"
+    }
+  }
+  

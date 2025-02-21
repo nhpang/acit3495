@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #login-form {
+            display: block;
+        }
+        #error-msg {
+            color: red;
+            display: none;
+        }
+        #confirm {
+            color: blue;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login to Input Stats</h1>
+
+    <div id="login-form">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <input type="text" id="value" placeholder="Value">
+        <button onclick="checkLogin()">Login</button>
+        <p id="error-msg">Invalid username or password!</p>
+        
+        <p id="confirm">Data Sent</p>
+        <a id="confirm" href="http://localhost:7000" target="_blank">Go to Localhost:7000</a>
+
+    </div>
+
+    <script>
+        async function checkLogin() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const value = document.getElementById("value").value; 
+
+            const response = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById("confirm").style.display = "block";
+
+                fetch("http://localhost:4000/enter", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        username: username, 
+                        password: password, 
+                        value: value
+                    })
+                })
+                .then(response => response.json())
+                .then(postData => {
+                    console.log(postData);
+                })
+                .catch(postError => console.error("Error in POST request:", postError)); 
+
+                fetch("http://localhost:3000", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                })
+                .then(response => response.json()) 
+                .then(data => console.log(data)) 
+                .catch(error => console.error("Error:", error)); 
+
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>

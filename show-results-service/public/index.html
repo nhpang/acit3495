@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MongoDB Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #stats {
+            margin-top: 20px;
+            font-size: 18px;
+            display: none; /* hide this until authenticated */
+        }
+        #login-form {
+            display: block;
+        }
+        #error-msg {
+            color: red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login to View Stats</h1>
+
+    <div id="login-form">
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="checkLogin()">Login</button>
+        <p id="error-msg">Invalid username or password!</p>
+    </div>
+
+    <div id="stats">
+        <h1>Latest Stats from MongoDB</h1>
+        <button onclick="fetchResults()">Get Latest Stats</button>
+        <div id="stats-content"></div>
+    </div>
+
+    <script>
+        async function checkLogin() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const response = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                document.getElementById("login-form").style.display = "none";
+                document.getElementById("stats").style.display = "block";
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+
+        async function fetchResults() {
+            try {
+                const response = await fetch("/results");
+                const data = await response.json();
+                
+                document.getElementById("stats-content").innerHTML = `
+                    <p><strong>Max Speed:</strong> ${data.max_speed}</p>
+                    <p><strong>Min Speed:</strong> ${data.min_speed}</p>
+                    <p><strong>Avg Speed:</strong> ${data.avg_speed}</p>
+                `;
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+                document.getElementById("stats-content").innerHTML = "<p>Failed to load stats.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

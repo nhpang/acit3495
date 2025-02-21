@@ -1,0 +1,65 @@
+version: "3.9"
+
+services:
+  authentication-service:
+    build: ./authentication-service
+    ports:
+      - "5000:5000"
+    networks:
+      - my_custom_network
+
+  enter-data-service:
+    build: ./enter-data-service
+    ports:
+      - "4000:4000"
+    depends_on:
+      - authentication-service
+      - mysql
+    networks:
+      - my_custom_network
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: nathan
+      MYSQL_DATABASE: stats
+    ports:
+      - "4306:3306"
+    command: --bind-address=0.0.0.0
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - my_custom_network
+
+
+  analytics-service:
+    build: ./analytics-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+      - mongo
+    networks:
+      - my_custom_network
+
+  mongo:
+    build: ./mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_db:/docker-entrypoint-initdb.d
+    networks:
+      - my_custom_network
+
+  show-results-service:
+    build: ./show-results-service
+    ports:
+      - "7000:7000"
+    depends_on:
+      - mongo
+    networks:
+      - my_custom_network
+
+networks:
+  my_custom_network:
+    driver: bridge
