@@ -349,3 +349,95 @@ mongo_data = {
 
 mongo_collection.insert_one(mongo_data)
 ```
+
+## Docker Compose
+The docker-compose file will create each Dockerfile by path
+
+Analytics
+Creates the analytics service on port 3000
+```yml
+analytics-service:
+    build: ./analytics-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+      - mongo
+    networks:
+      - my_custom_network
+```
+
+Authentication
+Creates the Authentication service on port 5000
+```yml
+authentication-service:
+    build: ./authentication-service
+    ports:
+      - "5000:5000"
+    networks:
+      - my_custom_network
+```
+Enter-Data
+Creates the Enter Data service on port 4000
+```yml
+enter-data-service:
+    build: ./enter-data-service
+    ports:
+      - "4000:4000"
+    depends_on:
+      - authentication-service
+      - mysql
+    networks:
+      - my_custom_network
+```
+
+MongoDB
+Creates the MongoDB used for retrieving the results from the analytics service
+```yml
+mongo:
+    build: ./mongo_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo_db:/docker-entrypoint-initdb.d
+    networks:
+      - my_custom_network
+```
+
+MySQL
+Creates the mysql database used for storing the value from the enter data service
+```yml
+mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: nathan
+      MYSQL_DATABASE: stats
+    ports:
+      - "4306:3306"
+    command: --bind-address=0.0.0.0
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+    networks:
+      - my_custom_network
+```
+
+Show-Results
+Creates the Show Results service on port 7000
+```yml
+show-results-service:
+    build: ./show-results-service
+    ports:
+      - "7000:7000"
+    depends_on:
+      - mongo
+    networks:
+      - my_custom_network
+```
+
+Each service is created on a port named 'my_custom_network' using a bridge driver
+```yml
+networks:
+  my_custom_network:
+    driver: bridge
+```
+
