@@ -127,7 +127,7 @@ spec:
     spec:
       containers:
       - name: authentication-service
-        image: acit3495-authentication-service:latest
+        image: auteau/authentication-service
         ports:
         - containerPort: 5000
 ---
@@ -165,7 +165,7 @@ spec:
     spec:
       containers:
       - name: enter-data-service
-        image: acit3495-enter-data-service:latest
+        image: auteau/enter-data-service
         ports:
         - containerPort: 4000
 ---
@@ -202,7 +202,7 @@ spec:
     spec:
       containers:
       - name: show-results-service
-        image: acit3495-show-results-service:latest
+        image: auteau/show-results-service
         ports:
         - containerPort: 7000
 ---
@@ -214,7 +214,7 @@ metadata:
   namespace: project2
 spec:
   selector:
-    app: acit3495-show-results-service:latest
+    app: auteau/show-results-service
   ports:
     - protocol: TCP
       port: 7000
@@ -239,7 +239,7 @@ spec:
     spec:
       containers:
       - name: analytics-service
-        image: acit3495-analytics-service:latest
+        image: auteau/analytics-service
         ports:
         - containerPort: 3000
 ---
