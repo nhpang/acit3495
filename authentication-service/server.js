@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = ["http://localhost:7000", "http://localhost:4000"];
+const allowedOrigins = ["http://show-results-service:7000", "http://enter-data-service:4000"];
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -27,5 +27,15 @@ app.post("/login", (req, res) => {
         res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 });
+
+app.get("/stress", (req, res) => {
+    const start = Date.now();
+    while (Date.now() - start < 5000) {
+        Math.sqrt(Math.random() * 10000);
+    }
+    res.send("CPU stress completed!");
+});
+
+
 
 app.listen(5000, () => console.log("Authentication Service running on port 5000"));

@@ -214,7 +214,7 @@ metadata:
   namespace: project2
 spec:
   selector:
-    app: auteau/show-results-service
+    app: show-results-service
   ports:
     - protocol: TCP
       port: 7000
