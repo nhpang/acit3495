@@ -48,6 +48,13 @@ spec:
         volumeMounts:
         - name: mysql-init-volume
           mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
       volumes:
       - name: mysql-init-volume
         configMap:
@@ -91,6 +98,13 @@ spec:
         volumeMounts:
         - name: mongo-data
           mountPath: /data/db
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
       volumes:
       - name: mongo-data
         emptyDir: {}
@@ -130,6 +144,13 @@ spec:
         image: auteau/authentication-service
         ports:
         - containerPort: 5000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
 ---
 # Authentication Service
 apiVersion: v1
@@ -144,8 +165,28 @@ spec:
     - protocol: TCP
       port: 5000
       targetPort: 5000
-  
   type: LoadBalancer
+---
+# Authentication HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: authentication-service-hpa
+  namespace: project2
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: authentication-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
 ---
 # Enter Data Service Deployment
 apiVersion: apps/v1
@@ -168,6 +209,13 @@ spec:
         image: auteau/enter-data-service
         ports:
         - containerPort: 4000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
 ---
 # Enter Data Service
 apiVersion: v1
@@ -183,6 +231,27 @@ spec:
       port: 4000
       targetPort: 4000
   type: LoadBalancer
+---
+# Enter Data HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: enter-data-service-hpa
+  namespace: project2
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: enter-data-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
 ---
 # Show Results Service Deployment
 apiVersion: apps/v1
@@ -205,6 +274,13 @@ spec:
         image: auteau/show-results-service
         ports:
         - containerPort: 7000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
 ---
 # Show Results Service
 apiVersion: v1
@@ -242,6 +318,13 @@ spec:
         image: auteau/analytics-service
         ports:
         - containerPort: 3000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
 ---
 # Analytics Service
 apiVersion: v1
@@ -257,3 +340,24 @@ spec:
       port: 3000
       targetPort: 3000
   type: LoadBalancer
+---
+# Analytics HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: analytics-service-hpa
+  namespace: project2
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: analytics-service
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50

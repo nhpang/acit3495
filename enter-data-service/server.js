@@ -32,7 +32,7 @@ app.post("/enter", async (req, res) => {
     const { username, password, value } = req.body;
 
     // check authentication
-    const authResponse = await axios.post("http://authentication-service:5000/login", { username, password });
+    const authResponse = await axios.post("http://18.237.177.225:5000/login", { username, password });
     if (!authResponse.data.success) return res.status(401).json({ message: "Unauthorized" });
 
     const db = mysql.createConnection({
