@@ -4,7 +4,7 @@ const cors = require("cors");
 const app = express();
 app.use(express.json());
 
-const allowedOrigins = ["http://18.237.177.225:7000", "http://18.237.177.225:4000"];
+const allowedOrigins = ["http://ec2-54-189-110-210.us-west-2.compute.amazonaws.com:7000", "http://ec2-54-189-110-210.us-west-2.compute.amazonaws.com:4000"];
 
 app.use(cors({
     origin: function (origin, callback) {
