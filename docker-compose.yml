@@ -7,6 +7,7 @@ services:
       - "5000:5000"
     networks:
       - my_custom_network
+    container_name: authentication-service
 
   enter-data-service:
     build: ./enter-data-service
@@ -17,6 +18,7 @@ services:
       - mysql
     networks:
       - my_custom_network
+    container_name: enter-data-service
 
   mysql:
     image: mysql:5.7
@@ -30,7 +32,7 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - my_custom_network
-
+    container_name: mysql
 
   analytics-service:
     build: ./analytics-service
@@ -41,6 +43,7 @@ services:
       - mongo
     networks:
       - my_custom_network
+    container_name: analytics-service
 
   mongo:
     build: ./mongo_db
@@ -50,6 +53,7 @@ services:
       - ./mongo_db:/docker-entrypoint-initdb.d
     networks:
       - my_custom_network
+    container_name: mongo
 
   show-results-service:
     build: ./show-results-service
@@ -59,6 +63,7 @@ services:
       - mongo
     networks:
       - my_custom_network
+    container_name: show-results-service
 
 networks:
   my_custom_network:

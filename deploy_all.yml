@@ -1,0 +1,259 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: project2
+---
+# MySQL Init Script ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: project2
+data:
+  init.sql: |
+    USE stats;
+
+    CREATE TABLE IF NOT EXISTS speed_data (
+        speedID INT AUTO_INCREMENT PRIMARY KEY,
+        speed INT NOT NULL
+    );
+---
+# MySQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: project2
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: nathan
+        - name: MYSQL_DATABASE
+          value: stats
+        volumeMounts:
+        - name: mysql-init-volume
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: mysql-init-volume
+        configMap:
+          name: mysql-init-script
+---
+# MySQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: project2
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+# MongoDB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: project2
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+      volumes:
+      - name: mongo-data
+        emptyDir: {}
+---
+# MongoDB Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: project2
+spec:
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+---
+# Authentication Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authentication-service
+  namespace: project2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: authentication-service
+  template:
+    metadata:
+      labels:
+        app: authentication-service
+    spec:
+      containers:
+      - name: authentication-service
+        image: auteau/authentication-service
+        ports:
+        - containerPort: 5000
+---
+# Authentication Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication-service
+  namespace: project2
+spec:
+  selector:
+    app: authentication-service
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  
+  type: LoadBalancer
+---
+# Enter Data Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enter-data-service
+  namespace: project2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: enter-data-service
+  template:
+    metadata:
+      labels:
+        app: enter-data-service
+    spec:
+      containers:
+      - name: enter-data-service
+        image: auteau/enter-data-service
+        ports:
+        - containerPort: 4000
+---
+# Enter Data Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: enter-data-service
+  namespace: project2
+spec:
+  selector:
+    app: enter-data-service
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000
+  type: LoadBalancer
+---
+# Show Results Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: show-results-service
+  namespace: project2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: show-results-service
+  template:
+    metadata:
+      labels:
+        app: show-results-service
+    spec:
+      containers:
+      - name: show-results-service
+        image: auteau/show-results-service
+        ports:
+        - containerPort: 7000
+---
+# Show Results Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: show-results-service
+  namespace: project2
+spec:
+  selector:
+    app: show-results-service
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  type: LoadBalancer
+---
+# Analytics Service Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-service
+  namespace: project2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-service
+  template:
+    metadata:
+      labels:
+        app: analytics-service
+    spec:
+      containers:
+      - name: analytics-service
+        image: auteau/analytics-service
+        ports:
+        - containerPort: 3000
+---
+# Analytics Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: analytics-service
+  namespace: project2
+spec:
+  selector:
+    app: analytics-service
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer
