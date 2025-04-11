@@ -127,7 +127,7 @@ spec:
     spec:
       containers:
       - name: authentication-service
-        image: ./authentication-service
+        image: authentication-service
         ports:
         - containerPort: 5000
 ---
@@ -165,7 +165,7 @@ spec:
     spec:
       containers:
       - name: enter-data-service
-        image: ./enter-data-service
+        image: enter-data-service
         ports:
         - containerPort: 4000
 ---
@@ -202,7 +202,7 @@ spec:
     spec:
       containers:
       - name: show-results-service
-        image: ./show-results-service
+        image: show-results-service
         ports:
         - containerPort: 7000
 ---
@@ -239,7 +239,7 @@ spec:
     spec:
       containers:
       - name: analytics-service
-        image: ./analytics-service
+        image: analytics-service
         ports:
         - containerPort: 3000
 ---
